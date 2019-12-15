@@ -348,6 +348,19 @@ RETURN COUNT(match1);
 
 
 
+
+// Index creation
+CREATE INDEX ON:Team(name);
+CREATE INDEX ON:Match(FTHG);
+CREATE INDEX ON:Match(FTAG);
+CREATE INDEX ON:Played(result);
+
+// Constraints
+CREATE CONSTRAINT ON (n1:Team) ASSERT n1.name IS UNIQUE;
+CREATE CONSTRAINT ON (n1:Referee) ASSERT n1.name IS UNIQUE;
+// DROP CONSTRAINT ON (n1:Team) ASSERT n1.name IS UNIQUE;
+// DROP CONSTRAINT ON (n1:Referee) ASSERT n1.name IS UNIQUE;
+
 LOAD CSV WITH HEADERS FROM 
 "file:///D:/Pobrane/EPL_dataset_for_2019_20_assignment.csv"
 AS row
@@ -389,17 +402,6 @@ END
 // and to prevent lags or freeze due rendering graphical model of database
 RETURN COUNT(match1);
 
-// Index creation
-CREATE INDEX ON:Team(name);
-CREATE INDEX ON:Match(FTHG);
-CREATE INDEX ON:Match(FTAG);
-CREATE INDEX ON:Played(result);
-
-// Constraints
-CREATE CONSTRAINT ON (n1:Team) ASSERT n1.name IS UNIQUE;
-CREATE CONSTRAINT ON (n1:Referee) ASSERT n1.name IS UNIQUE;
-// DROP CONSTRAINT ON (n1:Team) ASSERT n1.name IS UNIQUE;
-// DROP CONSTRAINT ON (n1:Referee) ASSERT n1.name IS UNIQUE;
 
 // CSV filepath:
 // "D:/Pobrane/EPL_dataset_for_2019_20_assignment.csv"
