@@ -1,6 +1,16 @@
+// Create Constraints
+CREATE CONSTRAINT ON (n1:Team) ASSERT n1.name IS UNIQUE;
+CREATE CONSTRAINT ON (n1:Referee) ASSERT n1.name IS UNIQUE;
 
+// Creating indexes
+// CREATE INDEX ON:Team(name);  // Existing due to the UNIQUE constraint
+CREATE INDEX ON:Match(FTHG);
+CREATE INDEX ON:Match(FTAG);
+CREATE INDEX ON:Played(result);
+
+
+// MERGE is not not working on complex queries; need to pasted separately
 // Creating Nodes
-
 LOAD CSV WITH HEADERS FROM 
 "file:///D:/Pobrane/EPL_dataset_for_2019_20_assignment.csv"
 AS row
@@ -12,7 +22,7 @@ CREATE (match1:Match{
     FTHG:row.FTHG,
     FTAG:row.FTAG,
     HTR:row.HTR
-})
+}) 
 MERGE (referee1:Referee{
     Name:row.Referee
 })
@@ -41,17 +51,6 @@ END
 // and to prevent lags or freeze due rendering graphical model of database
 RETURN COUNT(match1);
 
-// Delete command
-// MATCH (n1:Team) - [r1:Played] - (n2:Match) - [r2:Ref] - (n3:Referee) DETACH DELETE n1, r1, n2, r2, n3;
-
-// Constraints
-CREATE CONSTRAINT ON (n1:Team) ASSERT p.name IS UNIQUE;
-
-// Index creation
-CREATE INDEX ON:Team(name);
-CREATE INDEX ON:Match(FTHG);
-CREATE INDEX ON:Match(FTAG);
-CREATE INDEX ON:Played(result);
 
 
 
