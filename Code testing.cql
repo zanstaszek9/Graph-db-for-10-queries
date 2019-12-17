@@ -362,6 +362,8 @@ CREATE CONSTRAINT ON (n1:Referee) ASSERT n1.name IS UNIQUE;
 // DROP CONSTRAINT ON (n1:Team) ASSERT n1.name IS UNIQUE;
 // DROP CONSTRAINT ON (n1:Referee) ASSERT n1.name IS UNIQUE;
 
+// CALL db.indexes
+
 LOAD CSV WITH HEADERS FROM 
 "file:///D:/Pobrane/EPL_dataset_for_2019_20_assignment.csv"
 AS row
