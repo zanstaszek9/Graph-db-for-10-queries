@@ -18,10 +18,10 @@ WITH row
 WITH SPLIT(row.Date, '/') AS list, row
 // Using CREATE, as Merge can match the values that are existing with same properties' values
 CREATE (match1:Match{
-    Date:date((list[2] + '-' + list[1] + '-' + list[0])),
-    FTHG:row.FTHG,
-    FTAG:row.FTAG,
-    HTR:row.HTR
+    date:date((list[2] + '-' + list[1] + '-' + list[0])),
+    FTHG:toInteger(row.FTHG),   // Full Time Home (team) Goals
+    FTAG:toInteger(row.FTAG),   // Full Time Away (team) Goals
+    HTR:row.HTR                 // Half Time Result: H-home, A-away, D-draw
 }) 
 MERGE (referee1:Referee{
     Name:row.Referee
@@ -59,13 +59,13 @@ WITH row
 WITH SPLIT(row.Date, '/') AS list, row
 // Using CREATE, as Merge can match the values that are existing with same properties' values
 CREATE (match1:Match{
-    Date:date((list[2] + '-' + list[1] + '-' + list[0])),
-    FTHG:row.FTHG,
-    FTAG:row.FTAG,
-    HTR:row.HTR
+    date:date((list[2] + '-' + list[1] + '-' + list[0])),
+    FTHG:toInteger(row.FTHG),   // Full Time Home (team) Goals
+    FTAG:toInteger(row.FTAG),   // Full Time Away (team) Goals
+    HTR:row.HTR                 // Half Time Result: H-home, A-away, D-draw
 }) 
 MERGE (referee1:Referee{
-    Name:row.Referee
+    name:row.Referee
 })
 MERGE (team1:Team{
     name:row.HomeTeam
