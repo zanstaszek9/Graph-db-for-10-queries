@@ -46,12 +46,15 @@ OPTIONAL MATCH (liverpool:Team{name:"Liverpool"}) - [:Played{home: False, result
 RETURN matchesHome, matchesAway;
 
 // 9. Write a query to display the final ranking of all the teams based on their total points.
+// NEEDS A CORRECTION! CHECK MAIL
 MATCH (team:Team) - [:Played{home:False}] -> (matchAway:Match)
 WITH [SUM(matchAway.FTAG), team.name] AS awayGoals
 MATCH (team:Team) - [:Played{home:True}] -> (matchHome:Match)
 WHERE awayGoals[1] = team.name
 WITH  [(SUM(matchHome.FTHG) + awayGoals[0]), team.name] AS totalGoals ORDER BY totalGoals[0]
 RETURN totalGoals[1] as Team, totalGoals[0] as Points;
-
+// NEEDS A CORRECTION! CHECK MAIL
 
 // 10. Which team has drawn the most consecutive matches?
+
+
