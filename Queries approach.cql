@@ -224,4 +224,31 @@ RETURN matches;
 
 // Write a query to display the final ranking of all the teams based on their total points.
 
-// Which team has drawn the most consecutive matches?
+// 10. Which team has drawn the most consecutive matches?
+MATCH (n1:Team{name:"Arsenal"}) - [r1:Played] -> (n2:Match)
+WITH collect(r1.result) as x
+RETURN n1,x;
+
+MATCH (n1:Team{name:"Arsenal"}) - [r1:Played] -> (n2:Match)
+WITH n1.name as team, collect(r1.result) as x, collect(n2.date) as date
+RETURN team, x, date;
+
+
+MATCH (n1:Team{name:"Arsenal"}) - [r1:Played] -> (n2:Match)
+WITH n1.name as team, collect(r1.result) as x, collect(n2.date) as date ORDER BY date
+RETURN team, x, date;
+
+MATCH (n1:Team{name:"Arsenal"}) - [r1:Played] -> (n2:Match)
+RETURN n1.name, r1.result, n2.date
+ORDER BY n2.date;
+
+MATCH (n1:Team{name:"Arsenal"}) - [r1:Played] -> (n2:Match)
+WITH n1.name as x, r1.result as y, n2.date as z
+ORDER BY n2.date
+RETURN distinct x, collect(y), collect(z)
+
+
+MATCH (n1:Team{name:"Arsenal"}) - [r1:Played] -> (n2:Match)
+WITH n1.name as x, r1.result as y, n2.date as z
+ORDER BY n2.date
+RETURN distinct x, collect(y), collect(z)
