@@ -17,6 +17,7 @@ RETURN SUM(matchAway.FTAG) + homeGoals AS goalsScored, SUM(matchAway.FTHG) + hom
 
 // 4. Which teams have the most and least shots in the season?
 
+
 // 5. Who refereed the most matches?
 MATCH (referees:Referee) - [ref:Ref] - (:Match)
 WITH referees, COUNT(ref) AS countedRef 
@@ -37,8 +38,6 @@ OPTIONAL MATCH (liverpool:Team{name:"Liverpool"}) - [:Played{home: True, result:
 WITH liverpool, matchesHome
 OPTIONAL MATCH (liverpool:Team{name:"Liverpool"}) - [:Played{home: False, result: "Win"}] -> (matchesAway:Match{HTR: 'H'})
 RETURN matchesHome, matchesAway;
-
-// Performance test option for properties set? played
 
 // 9. Write a query to display the final ranking of all the teams based on their total points.
 
