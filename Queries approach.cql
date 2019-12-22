@@ -222,7 +222,86 @@ RETURN matches;
 
 // Performance test option for properties set? played
 
-// Write a query to display the final ranking of all the teams based on their total points.
+// 9. Write a query to display the final ranking of all the teams based on their total points.
+// NEEDS A CORRECTION! CHECK MAIL
+MATCH (team:Team) - [:Played{home:False}] -> (matchAway:Match)
+WITH [SUM(matchAway.FTAG), team.name] AS awayGoals
+MATCH (team:Team) - [:Played{home:True}] -> (matchHome:Match)
+WHERE awayGoals[1] = team.name
+WITH  [(SUM(matchHome.FTHG) + awayGoals[0]), team.name] AS totalGoals ORDER BY totalGoals[0]
+RETURN totalGoals[1] as Team, totalGoals[0] as Points;
+
+
+MATCH (team:Team) - [played:Played{}]
+WITH team, COUNT(played.result = "Win") as matchesWon, COUNT(played.result = "Draw") as matchesDrawn
+RETURN team.name, matchesWon, matchesDrawn;
+
+
+MATCH (team:Team) - [played:Played{result: "Win"}] - (matchesWon:Match)
+WITH team, matchesWon
+OPTIONAL MATCH (team:Team) - [played:Played{result: "Draw"}] - (matchesDrawn:Match)
+WITH team, COUNT(matchesWon) as countWon, COUNT(matchesDrawn) as countDrawn
+RETURN team.name, countWon, countDrawn;
+
+
+
+MATCH (team:Team) - [played:Played{result: "Win"}] - (matchesWon:Match)
+WITH team, COUNT(matchesWon) as countWon
+RETURN team.name, countWon;
+
+
+MATCH (team:Team) - [played:Played{result: "Win"}] - (matchesWon:Match)
+WITH team, COUNT(matchesWon) as countWon
+RETURN team.name, countWon;
+
+
+
+MATCH (team:Team) - [:Played{result: "Win"}] - (matchesWon:Match)
+WITH team, matchesWon
+OPTIONAL MATCH (team) - [:Played{result: "Draw"}] - (matchesDrawn:Match)
+RETURN team.name as Team, COUNT(DISTINCT matchesWon) as Win, COUNT(DISTINCT matchesDrawn) as Draws;
+
+
+MATCH (team:Team) - [:Played{result: "Win"}] - (matchesWon:Match)
+WITH team, matchesWon
+OPTIONAL MATCH (team) - [:Played{result: "Draw"}] - (matchesDrawn:Match)
+RETURN team.name, COUNT(DISTINCT matchesWon), COUNT(DISTINCT matchesDrawn);
+
+
+
+MATCH (team:Team) - [:Played{result: "Win"}] - (matchesWon:Match)
+WITH team, matchesWon
+OPTIONAL MATCH (team) - [:Played{result: "Draw"}] - (matchesDrawn:Match)
+RETURN team.name, toInteger(COUNT(DISTINCT matchesWon))*3, COUNT(DISTINCT matchesDrawn);
+
+MATCH (team:Team) - [:Played{result: "Win"}] - (matchesWon:Match)
+WITH team, matchesWon
+OPTIONAL MATCH (team) - [:Played{result: "Draw"}] - (matchesDrawn:Match)
+WITH team, toInteger(COUNT(DISTINCT matchesWon))*3 as countWon, toInteger(COUNT(DISTINCT matchesDrawn)) as countDrawn
+RETURN team.name, countWon, countDrawn;
+
+
+MATCH (team:Team) - [:Played{result: "Win"}] - (matchesWon:Match)
+WITH team, matchesWon
+OPTIONAL MATCH (team) - [:Played{result: "Draw"}] - (matchesDrawn:Match)
+WITH team, (COUNT(DISTINCT matchesWon)) as countWon, (COUNT(DISTINCT matchesDrawn)) as countDrawn
+RETURN team.name, toInteger(countWon), toInteger(countDrawn);
+
+
+MATCH (team:Team) - [:Played{result: "Win"}] - (matchesWon:Match)
+WITH team, matchesWon
+OPTIONAL MATCH (team) - [:Played{result: "Draw"}] - (matchesDrawn:Match)
+WITH team, (COUNT(DISTINCT matchesWon)) as countWon, (COUNT(DISTINCT matchesDrawn)) as countDrawn
+RETURN team.name as Team, toInteger(countWon)*3 + toInteger(countDrawn) as TotalPoints
+ORDER BY TotalPoints DESC;
+
+
+
+MATCH (team:Team) - [:Played{result: "Win"}] - (matchesWon:Match)
+WITH team, matchesWon
+OPTIONAL MATCH (team) - [:Played{result: "Draw"}] - (matchesDrawn:Match)
+RETURN team.name, (toInteger(COUNT(DISTINCT matchesWon))*3 + toInteger(COUNT(DISTINCT matchesDrawn));
+
 
 // 10. Which team has drawn the most consecutive matches?
 MATCH (n1:Team{name:"Arsenal"}) - [r1:Played] -> (n2:Match)
