@@ -21,7 +21,10 @@ CREATE (match1:Match{
     date:date((list[2] + '-' + list[1] + '-' + list[0])),
     FTHG:toInteger(row.FTHG),   // Full Time Home (team) Goals
     FTAG:toInteger(row.FTAG),   // Full Time Away (team) Goals
-    HTR:row.HTR                 // Half Time Result: H-home, A-away, D-draw
+    HTR:row.HTR,                // Half Time Result: H-home, A-away, D-draw
+    HS: toInteger(row.HS),      // Home team total shots
+    AS: toInteger(row.AS)       // Away team total shots
+
 }) 
 MERGE (referee1:Referee{
     name:row.Referee
