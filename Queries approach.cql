@@ -163,6 +163,25 @@ WITH  [(SUM(matchHome.FTHG) + awayGoals[0]), team.name] AS totalGoals
 RETURN [n in totalGoals WHERE n = MIN(totalGoals)] as leastGoals;
 // Cant find a way to make it work when there are 2 same MIN/MAX values
 
+MATCH (n1:Team) - [:Played{home:False}] -> (matchHome:Match)
+RETURN n1.name, SUM(matchHome.AS) as Goals 
+ORDER BY Goals ASC;
+
+
+MATCH (team:Team) - [:Played{home:False}] -> (matchAway:Match)
+WITH [SUM(matchAway.AS), team.name] AS awayGoals
+MATCH (team:Team) - [:Played{home:True}] -> (matchHome:Match)
+WHERE awayGoals[1] = team.name
+WITH  [(SUM(matchHome.HS) + awayGoals[0]), team.name] AS totalGoals ORDER BY totalGoals[0]
+RETURN totalGoals;
+
+MATCH (team:Team) - [:Played{home:False}] -> (matchAway:Match)
+WITH [SUM(matchAway.AS), team.name] AS awayGoals
+MATCH (team:Team) - [:Played{home:True}] -> (matchHome:Match)
+WHERE awayGoals[1] = team.name
+WITH  [(SUM(matchHome.HS) + awayGoals[0]), team.name] AS totalGoals
+RETURN MIN(totalGoals)[1] as leastGoals, MAX(totalGoals)[1] as mostGoals;
+
 
 // 5. Who refereed the most matches?
 MATCH (referees:Referee) - [ref:Ref] - (:Match)
