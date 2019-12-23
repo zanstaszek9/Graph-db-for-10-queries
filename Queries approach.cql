@@ -183,6 +183,21 @@ WITH  [(SUM(matchHome.HS) + awayGoals[0]), team.name] AS totalGoals
 RETURN MIN(totalGoals)[1] as leastGoals, MAX(totalGoals)[1] as mostGoals;
 
 
+// Improved using Query 10
+MATCH (team:Team) - [:Played{home:False}] -> (matchAway:Match)
+WITH [SUM(matchAway.AS), team.name] AS awayGoals
+MATCH (team:Team) - [:Played{home:True}] -> (matchHome:Match)
+WHERE awayGoals[1] = team.name
+WITH  [(SUM(matchHome.HS) + awayGoals[0]), team.name] AS totalShots
+WITH collect(totalShots) AS totalShotsCollected, max(totalShots[0]) as maxShots, min(totalShots[0]) as minShots
+UNWIND totalShotsCollected AS totalShotsUnwind
+WITH totalShotsUnwind, maxShots, minShots
+WHERE totalShotsUnwind[0] = maxShots OR totalShotsUnwind[0] = minShots
+MATCH (team:Team{name:totalShotsUnwind[1]})
+RETURN team, maxShots, minShots
+
+
+
 // 5. Who refereed the most matches?
 MATCH (referees:Referee) - [ref:Ref] - (:Match)
 WITH referees, COUNT(ref) AS countedRef 
@@ -349,4 +364,355 @@ RETURN distinct x, collect(y), collect(z)
 MATCH (n1:Team{name:"Arsenal"}) - [r1:Played] -> (n2:Match)
 WITH n1.name as x, r1.result as y, n2.date as z
 ORDER BY n2.date
-RETURN distinct x, collect(y), collect(z)
+RETURN distinct x, collect(y)
+
+
+MATCH (n1:Team{name:"Arsenal"}) - [r1:Played] -> (n2:Match)
+WITH n1.name as x, r1.result as y, n2.date as z
+ORDER BY n2.date
+WITH z AS list
+RETURN [i IN range(0, size(list)-1)
+    WHERE i = "Draft"
+
+
+;
+
+
+
+
+MATCH (n1:Team) - [r1:Played] -> (n2:Match)
+WITH n1.name as x, r1.result as y, n2.date as z
+ORDER BY n2.date
+RETURN distinct x, collect(y)
+ORDER BY x
+
+
+
+// https://stackoverflow.com/questions/47671393/neo4j-cypher-return-most-consecutive-passes
+MATCH (n1:Team) - [r1:Played] -> (n2:Match)
+WITH distinct n1.name as x, r1.result as y, n2.date as z
+ORDER BY n2.date
+WITH x, collect(y) as p
+WITH x, reduce(acc = [], i IN range(0, size(p) - 1) | 
+    CASE p[i] = p[i-1]
+      WHEN true THEN [j IN range(0, size(acc) - 1) |
+          CASE j = size(acc) - 1
+            WHEN true THEN acc[j] + [p[i]]
+            ELSE acc[j]
+          END
+        ]
+      ELSE acc + [[p[i]]]
+    END
+  ) AS streaks // (1)
+RETURN x, streaks
+ORDER BY x;
+
+MATCH (n1:Team) - [r1:Played] -> (n2:Match)
+WITH distinct n1.name as x, r1.result as y, n2.date as z
+ORDER BY n2.date
+WITH x, collect(y) as p
+WITH x, reduce(acc = [], i IN range(0, size(p) - 1) | 
+    CASE p[i] = p[i-1]
+      WHEN true THEN [j IN range(0, size(acc) - 1) |
+          CASE j = size(acc) - 1
+            WHEN true THEN acc[j] + [p[i]]
+            ELSE acc[j]
+          END
+        ]
+      ELSE acc + [[p[i]]]
+    END
+  ) AS streaks // (1)
+UNWIND streaks AS streak
+WITH x, streak
+WHERE streak[0] = 'Draw'
+RETURN x, max(size(streak)) AS consecutivePasses
+ORDER BY x
+
+
+MATCH (n1:Team) - [r1:Played] -> (n2:Match)
+WITH distinct n1.name as x, r1.result as y, n2.date as z
+ORDER BY n2.date
+WITH x, collect(y) as p
+WITH x, reduce(acc = [], i IN range(0, size(p) - 1) | 
+    CASE p[i] = p[i-1]
+      WHEN true THEN [j IN range(0, size(acc) - 1) |
+          CASE j = size(acc) - 1
+            WHEN true THEN acc[j] + [p[i]]
+            ELSE acc[j]
+          END
+        ]
+      ELSE acc + [[p[i]]]
+    END
+  ) AS streaks // (1)
+UNWIND streaks AS streak
+WITH x, streak
+WHERE streak[0] = 'Draw'
+WITH x, max(size(streak)) AS consecutivePasses
+RETURN x, consecutivePasses
+ORDER BY consecutivePasses DESC
+
+
+MATCH (n1:Team) - [r1:Played] -> (n2:Match)
+WITH distinct n1.name as x, r1.result as y, n2.date as z
+ORDER BY n2.date
+WITH x, collect(y) as p
+WITH x, reduce(acc = [], i IN range(0, size(p) - 1) | 
+    CASE p[i] = p[i-1]
+      WHEN true THEN [j IN range(0, size(acc) - 1) |
+          CASE j = size(acc) - 1
+            WHEN true THEN acc[j] + [p[i]]
+            ELSE acc[j]
+          END
+        ]
+      ELSE acc + [[p[i]]]
+    END
+  ) AS streaks // (1)
+UNWIND streaks AS streak
+WITH x, streak
+WHERE streak[0] = 'Draw'
+WITH x, max(size(streak)) AS consecutivePasses
+RETURN x, consecutivePasses
+
+// Trying to return only teams with max drawns; collect
+MATCH (n1:Team) - [r1:Played] -> (n2:Match)
+WITH distinct n1.name as x, r1.result as y, n2.date as z
+ORDER BY n2.date
+WITH x, collect(y) as p
+WITH x, reduce(acc = [], i IN range(0, size(p) - 1) | 
+    CASE p[i] = p[i-1]
+      WHEN true THEN [j IN range(0, size(acc) - 1) |
+          CASE j = size(acc) - 1
+            WHEN true THEN acc[j] + [p[i]]
+            ELSE acc[j]
+          END
+        ]
+      ELSE acc + [[p[i]]]
+    END
+  ) AS streaks // (1)
+UNWIND streaks AS streak
+WITH x, streak
+WHERE streak[0] = 'Draw'
+WITH x, max(size(streak)) AS consecutivePasses
+ORDER BY consecutivePasses DESC
+WITH [consecutivePasses, x] AS array
+WITH collect(array) AS arC, max(array[0]) as maxV
+UNWIND arC AS rArr
+WHERE rArr[0] = maxV
+RETURN rArr
+
+
+
+MATCH (n1:Team) - [r1:Played] -> (n2:Match)
+WITH distinct n1.name as x, r1.result as y, n2.date as z
+ORDER BY n2.date
+WITH x, collect(y) as p
+WITH x, reduce(acc = [], i IN range(0, size(p) - 1) | 
+    CASE p[i] = p[i-1]
+      WHEN true THEN [j IN range(0, size(acc) - 1) |
+          CASE j = size(acc) - 1
+            WHEN true THEN acc[j] + [p[i]]
+            ELSE acc[j]
+          END
+        ]
+      ELSE acc + [[p[i]]]
+    END
+  ) AS streaks // (1)
+UNWIND streaks AS streak
+WITH x, streak
+WHERE streak[0] = 'Draw'
+WITH x, max(size(streak)) AS consecutivePasses
+ORDER BY consecutivePasses DESC
+RETURN consecutivePasses[0]
+
+
+
+
+MATCH (n1:Team) - [r1:Played] -> (n2:Match)
+WITH distinct n1.name as x, r1.result as y, n2.date as z
+ORDER BY n2.date
+WITH x, collect(y) as p
+WITH x, reduce(acc = [], i IN range(0, size(p) - 1) | 
+    CASE p[i] = p[i-1]
+      WHEN true THEN [j IN range(0, size(acc) - 1) |
+          CASE j = size(acc) - 1
+            WHEN true THEN acc[j] + [p[i]]
+            ELSE acc[j]
+          END
+        ]
+      ELSE acc + [[p[i]]]
+    END
+  ) AS streaks // (1)
+UNWIND streaks AS streak
+WITH x, streak
+WHERE streak[0] = 'Draw'
+WITH x, max(size(streak)) AS consecutivePasses
+ORDER BY consecutivePasses DESC
+WITH [consecutivePasses, x] AS array
+WITH array, MAX(array) as point
+RETURN array, point
+
+
+
+MATCH (n1:Team) - [r1:Played] -> (n2:Match)
+WITH distinct n1.name as x, r1.result as y, n2.date as z
+ORDER BY n2.date
+WITH x, collect(y) as p
+WITH x, reduce(acc = [], i IN range(0, size(p) - 1) | 
+    CASE p[i] = p[i-1]
+      WHEN true THEN [j IN range(0, size(acc) - 1) |
+          CASE j = size(acc) - 1
+            WHEN true THEN acc[j] + [p[i]]
+            ELSE acc[j]
+          END
+        ]
+      ELSE acc + [[p[i]]]
+    END
+  ) AS streaks // (1)
+UNWIND streaks AS streak
+WITH x, streak
+WHERE streak[0] = 'Draw'
+WITH x, max(size(streak)) AS consecutivePasses
+ORDER BY consecutivePasses DESC
+WITH [consecutivePasses, x] AS array
+WITH collect(array) AS arC, max(array[0]) as maxV
+RETURN arC, maxV
+
+MATCH (n1:Team) - [r1:Played] -> (n2:Match)
+WITH distinct n1.name as x, r1.result as y, n2.date as z
+ORDER BY n2.date
+WITH x, collect(y) as p
+WITH x, reduce(acc = [], i IN range(0, size(p) - 1) | 
+    CASE p[i] = p[i-1]
+      WHEN true THEN [j IN range(0, size(acc) - 1) |
+          CASE j = size(acc) - 1
+            WHEN true THEN acc[j] + [p[i]]
+            ELSE acc[j]
+          END
+        ]
+      ELSE acc + [[p[i]]]
+    END
+  ) AS streaks // (1)
+UNWIND streaks AS streak
+WITH x, streak
+WHERE streak[0] = 'Draw'
+WITH x, max(size(streak)) AS consecutivePasses
+ORDER BY consecutivePasses DESC
+WITH [consecutivePasses, x] AS array
+WITH collect(array) AS arC, max(array[0]) as maxV
+UNWIND arC as ar
+WITH ar, maxV
+WHERE ar[0] = maxV
+RETURN ar
+
+MATCH (n1:Team) - [r1:Played] -> (n2:Match)
+WITH distinct n1.name as x, r1.result as y, n2.date as z
+ORDER BY n2.date
+WITH x, collect(y) as p
+WITH x, reduce(acc = [], i IN range(0, size(p) - 1) | 
+    CASE p[i] = p[i-1]
+      WHEN true THEN [j IN range(0, size(acc) - 1) |
+          CASE j = size(acc) - 1
+            WHEN true THEN acc[j] + [p[i]]
+            ELSE acc[j]
+          END
+        ]
+      ELSE acc + [[p[i]]]
+    END
+  ) AS streaks // (1)
+UNWIND streaks AS streak
+WITH x, streak
+WHERE streak[0] = 'Draw'
+WITH x, max(size(streak)) AS consecutivePasses
+ORDER BY consecutivePasses DESC
+WITH [consecutivePasses, x] AS array
+WITH collect(array) AS arC, max(array[0]) as maxV
+UNWIND arC as ar
+WITH ar, maxV
+WHERE ar[0] = maxV
+RETURN ar[1]
+
+
+MATCH (n1:Team) - [r1:Played] -> (n2:Match)
+WITH distinct n1.name as x, r1.result as y, n2.date as z
+ORDER BY n2.date
+WITH x, collect(y) as p
+WITH x, reduce(acc = [], i IN range(0, size(p) - 1) | 
+    CASE p[i] = p[i-1]
+      WHEN true THEN [j IN range(0, size(acc) - 1) |
+          CASE j = size(acc) - 1
+            WHEN true THEN acc[j] + [p[i]]
+            ELSE acc[j]
+          END
+        ]
+      ELSE acc + [[p[i]]]
+    END
+  ) AS streaks // (1)
+UNWIND streaks AS streak
+WITH x, streak
+WHERE streak[0] = 'Draw'
+WITH x, max(size(streak)) AS consecutivePasses
+ORDER BY consecutivePasses DESC
+WITH [consecutivePasses, x] AS array
+WITH collect(array) AS arC, max(array[0]) as maxV
+UNWIND arC as ar
+WITH ar, maxV
+WHERE ar[0] = maxV
+MATCH (l:Team{name:ar[1]})
+RETURN l, maxV
+
+MATCH (n1:Team) - [r1:Played] -> (n2:Match)
+WITH distinct n1.name as x, r1.result as y, n2.date as z
+ORDER BY n2.date
+WITH x, collect(y) as p
+WITH x, reduce(acc = [], i IN range(0, size(p) - 1) | 
+    CASE p[i] = p[i-1]
+      WHEN true THEN [j IN range(0, size(acc) - 1) |
+          CASE j = size(acc) - 1
+            WHEN true THEN acc[j] + [p[i]]
+            ELSE acc[j]
+          END
+        ]
+      ELSE acc + [[p[i]]]
+    END
+  ) AS streaks // (1)
+UNWIND streaks AS streak
+WITH x, streak
+WHERE streak[0] = 'Draw'
+WITH x, max(size(streak)) AS consecutivePasses
+ORDER BY consecutivePasses DESC
+WITH [consecutivePasses, x] AS array
+WITH collect(array) AS arC, max(array[0]) as maxV
+UNWIND arC as ar
+WITH ar, maxV
+WHERE ar[0] = maxV
+MATCH (l:Team{name:ar[1]})
+RETURN l, maxV
+
+
+MATCH (teams:Team) - [played:Played] -> (matches:Match)
+WITH distinct teams.name as teamsNames, played.result as y, matches.date as z
+ORDER BY matches.date
+WITH teamsNames, collect(y) as teamsNamesCollected
+WITH teamsNames, reduce(temporary = [], i IN range(0, size(teamsNamesCollected) - 1) | 
+    CASE teamsNamesCollected[i] = teamsNamesCollected[i-1]
+      WHEN true THEN [j IN range(0, size(temporary) - 1) |
+          CASE j = size(temporary) - 1
+            WHEN true THEN temporary[j] + [teamsNamesCollected[i]]
+            ELSE temporary[j]
+          END
+        ]
+      ELSE temporary + [[teamsNamesCollected[i]]]
+    END
+  ) AS streaks // (1)
+UNWIND streaks AS streak
+WITH teamsNames, streak
+WHERE streak[0] = 'Draw'
+WITH teamsNames, max(size(streak)) AS consecutiveDraws
+ORDER BY consecutiveDraws DESC
+WITH [consecutiveDraws, x] AS consecutiveDrawsArr
+WITH collect(consecutiveDrawsArr) AS consecutiveDraws, max(consecutiveDrawsArr[0]) AS maxDrawAmounts
+UNWIND consecutiveDraws AS consecutiveDrawsArrUnwind
+WITH consecutiveDrawsArrUnwind, maxDrawAmounts
+WHERE consecutiveDrawsArrUnwind[0] = maxDrawAmounts
+MATCH (winners:Team{name:consecutiveDrawsArrUnwind[1]})
+RETURN winners, maxDrawAmounts
