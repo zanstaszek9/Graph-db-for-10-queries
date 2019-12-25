@@ -1,17 +1,17 @@
 // 1. Show all the EPL teams involved in the season.
 MATCH (n1:Team)
-RETURN n1 as Team;
+RETURN n1 AS Team;
 
 // 2. How many matches were played on Mondays?
 // 1 for Monday, 7 for Sunday
 MATCH (n1:Match)
 WHERE n1.date.dayOfWeek = 1
-RETURN COUNT(n1) as mondayMatches;
+RETURN COUNT(n1) AS mondayMatches;
 
 // 3. Display the total number of goals “Liverpool” 
 // had scored and conceded in the season.
 MATCH (liverpool:Team{name:"Liverpool"}) - [:Played{home:True}] -> (matchHome:Match)
-WITH liverpool, SUM(matchHome.FTHG) as homeGoals, SUM(matchHome.FTAG) as homeLost
+WITH liverpool, SUM(matchHome.FTHG) AS homeGoals, SUM(matchHome.FTAG) AS homeLost
 MATCH (liverpool) - [:Played{home:False}] -> (matchAway:Match)
 RETURN SUM(matchAway.FTAG) + homeGoals AS goalsScored, SUM(matchAway.FTHG) + homeLost AS goalsConceded;
 
@@ -19,13 +19,13 @@ RETURN SUM(matchAway.FTAG) + homeGoals AS goalsScored, SUM(matchAway.FTHG) + hom
 MATCH (team:Team) - [:Played{home:False}] -> (matchAway:Match)
 WITH [SUM(matchAway.AS), team.name] AS awayGoals
 MATCH (team:Team) - [:Played{home:True}] -> (matchHome:Match)
-WHERE awayGoals[1] = team.name
-WITH  [(SUM(matchHome.HS) + awayGoals[0]), team.name] AS totalShots
-// Collecting and Unwinding to use max and min as variables
+WHERE awayGoals[1] = team.name 
+WITH  [(SUM(matchHome.HS) + awayGoals[0]), team.name] AS totalShots 
+// Collecting and Unwinding to use max and min as variables 
 WITH collect(totalShots) AS totalShotsCollected, 
     MAX(totalShots[0]) AS maxShots, MIN(totalShots[0]) AS minShots
-UNWIND totalShotsCollected AS totalShotsUnwind
-// Getting team names with least and most number of shots to match nodes
+UNWIND totalShotsCollected AS totalShotsUnwind 
+// Getting team names with least and most number of shots to match nodes 
 WITH totalShotsUnwind, maxShots, minShots
 WHERE totalShotsUnwind[0] = maxShots OR totalShotsUnwind[0] = minShots
 MATCH (team:Team{name:totalShotsUnwind[1]})
@@ -61,16 +61,14 @@ WITH team, matchesWon
 OPTIONAL MATCH (team) - [:Played{result: "Draw"}] - (matchesDrawn:Match)
 WITH team, (COUNT(DISTINCT matchesWon)) AS countWon, (COUNT(DISTINCT matchesDrawn)) AS countDrawn
 RETURN team.name AS Team, toInteger(countWon)*3 + toInteger(countDrawn) AS totalPoints
-ORDER BY totalPoints DESC;
-
-
-// 10. Which team has drawn the most consecutive matches?
-// Source:
-// https://stackoverflow.com/questions/47671393/neo4j-cypher-return-most-consecutive-passes
+ORDER BY totalPoints DESC; 
+ 
+ 
+// 10. Which team has drawn the most consecutive matches? 
 MATCH (teams:Team) - [played:Played] -> (matches:Match)
-WITH DISTINCT teams.name AS teamsNames, played.result AS matchResults, matches.date as z
+WITH DISTINCT teams.name AS teamsNames, played.result AS matchResults, matches.date AS z
 ORDER BY matches.date
-WITH teamsNames, collect(matchResults) as matchResultsCollected
+WITH teamsNames, collect(matchResults) AS matchResultsCollected
 WITH teamsNames, reduce(temporary = [], i IN range(0, size(matchResultsCollected) - 1) | 
     CASE matchResultsCollected[i] = matchResultsCollected[i-1]
       WHEN true THEN [j IN range(0, size(temporary) - 1) |
@@ -95,7 +93,9 @@ UNWIND consecutiveDraws AS consecutiveDrawsArrUnwind
 WITH consecutiveDrawsArrUnwind, maxDrawAmounts
 WHERE consecutiveDrawsArrUnwind[0] = maxDrawAmounts
 MATCH (winners:Team{name:consecutiveDrawsArrUnwind[1]})
-RETURN winners AS Winners, maxDrawAmounts
+RETURN winners AS Winners, maxDrawAmounts;
+// Source: 
+/// https://stackoverflow.com/questions/47671393/neo4j-cypher-return-most-consecutive-passes 
 
 
 
