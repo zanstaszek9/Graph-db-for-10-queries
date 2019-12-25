@@ -21,8 +21,11 @@ WITH [SUM(matchAway.AS), team.name] AS awayGoals
 MATCH (team:Team) - [:Played{home:True}] -> (matchHome:Match)
 WHERE awayGoals[1] = team.name
 WITH  [(SUM(matchHome.HS) + awayGoals[0]), team.name] AS totalShots
-WITH collect(totalShots) AS totalShotsCollected, max(totalShots[0]) as maxShots, min(totalShots[0]) as minShots
+// Collecting and Unwinding to use max and min as variables
+WITH collect(totalShots) AS totalShotsCollected, 
+    MAX(totalShots[0]) AS maxShots, MIN(totalShots[0]) AS minShots
 UNWIND totalShotsCollected AS totalShotsUnwind
+// Getting team names with least and most number of shots to match nodes
 WITH totalShotsUnwind, maxShots, minShots
 WHERE totalShotsUnwind[0] = maxShots OR totalShotsUnwind[0] = minShots
 MATCH (team:Team{name:totalShotsUnwind[1]})
@@ -33,8 +36,7 @@ ORDER BY Shots DESC;
 MATCH (referees:Referee) - [ref:Ref] - (:Match)
 WITH referees, COUNT(ref) AS countedRef 
 ORDER BY countedRef DESC LIMIT 1
-MATCH (mostRefered:Referee{name:referees.name})
-RETURN mostRefered AS refName, countedRef;
+RETURN referees AS Referee, countedRef;
 
 // 6. How many matches “Arsenal” won as the away team?
 MATCH (:Team{name:"Arsenal"}) - [:Played{home: False, result: "Win"}] - (matches:Match)
@@ -42,7 +44,7 @@ RETURN COUNT(matches) AS wonAway;
 
 // 7. Display all the matches that “Man United” lost.
 MATCH (:Team{name:"Man United"}) - [:Played{result: "Lose"}] - (matches:Match)
-RETURN matches;
+RETURN matches AS Matches;
 
 
 // 8. Display all matches that “Liverpool” won 
@@ -83,10 +85,12 @@ WITH teamsNames, reduce(temporary = [], i IN range(0, size(matchResultsCollected
 UNWIND streaks AS streak
 WITH teamsNames, streak
 WHERE streak[0] = 'Draw'
-WITH teamsNames, max(size(streak)) AS consecutiveDraws
+WITH teamsNames, MAX(size(streak)) AS consecutiveDraws
 ORDER BY consecutiveDraws DESC
 WITH [consecutiveDraws, teamsNames] AS consecutiveDrawsArr
-WITH collect(consecutiveDrawsArr) AS consecutiveDraws, max(consecutiveDrawsArr[0]) AS maxDrawAmounts
+// Using Collect and Unwind to find Team nodes 
+// with the same highest number of consecutive draws
+WITH collect(consecutiveDrawsArr) AS consecutiveDraws, MAX(consecutiveDrawsArr[0]) AS maxDrawAmounts
 UNWIND consecutiveDraws AS consecutiveDrawsArrUnwind
 WITH consecutiveDrawsArrUnwind, maxDrawAmounts
 WHERE consecutiveDrawsArrUnwind[0] = maxDrawAmounts
