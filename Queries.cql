@@ -56,8 +56,8 @@ MATCH (team:Team) - [:Played{result: "Win"}] - (matchesWon:Match)
 WITH team, matchesWon
 OPTIONAL MATCH (team) - [:Played{result: "Draw"}] - (matchesDrawn:Match)
 WITH team, (COUNT(DISTINCT matchesWon)) AS countWon, (COUNT(DISTINCT matchesDrawn)) AS countDrawn
-RETURN team.name AS Team, toInteger(countWon)*3 + toInteger(countDrawn) AS TotalPoints
-ORDER BY TotalPoints DESC;
+RETURN team.name AS Team, toInteger(countWon)*3 + toInteger(countDrawn) AS totalPoints
+ORDER BY totalPoints DESC;
 
 
 // 10. Which team has drawn the most consecutive matches?
@@ -89,7 +89,7 @@ UNWIND consecutiveDraws AS consecutiveDrawsArrUnwind
 WITH consecutiveDrawsArrUnwind, maxDrawAmounts
 WHERE consecutiveDrawsArrUnwind[0] = maxDrawAmounts
 MATCH (winners:Team{name:consecutiveDrawsArrUnwind[1]})
-RETURN winners, maxDrawAmounts
+RETURN winners AS Winners, maxDrawAmounts
 
 
 
