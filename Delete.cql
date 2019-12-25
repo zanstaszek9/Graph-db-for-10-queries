@@ -11,8 +11,6 @@ DROP CONSTRAINT ON (n1:Referee) ASSERT n1.name IS UNIQUE;
 
 // Remove indexes
 // DROP INDEX ON:Team(name);  // Deleted earlier due to the UNIQUE constraint
-DROP INDEX ON:Match(FTHG);
-DROP INDEX ON:Match(FTAG);
 DROP INDEX ON:Played(result);
 
 // Sanity check
