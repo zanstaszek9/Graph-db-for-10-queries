@@ -204,6 +204,14 @@ WITH referees, COUNT(ref) AS countedRef
 ORDER BY countedRef DESC LIMIT 1
 RETURN referees.name, countedRef;
 
+MATCH (referees:Referee) - [ref:Ref] - (:Match)
+WITH referees, COUNT(ref) AS countedRef 
+ORDER BY countedRef DESC LIMIT 1
+MATCH (mostRefered:Referee{name:referees.name})
+RETURN mostRefered AS refName, countedRef;
+
+
+
 // 6. How many matches “Arsenal” won as the away team?
 MATCH (:Team{name:"Arsenal"}) - [:Played{home: False, result: "Win"}] - (matches:Match)
 RETURN COUNT(matches);
