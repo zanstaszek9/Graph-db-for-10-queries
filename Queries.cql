@@ -55,7 +55,35 @@ ORDER BY TotalPoints DESC;
 
 
 // 10. Which team has drawn the most consecutive matches?
-
+// Source:
+// https://stackoverflow.com/questions/47671393/neo4j-cypher-return-most-consecutive-passes
+MATCH (teams:Team) - [played:Played] -> (matches:Match)
+WITH DISTINCT teams.name AS teamsNames, played.result AS matchResults, matches.date as z
+ORDER BY matches.date
+WITH teamsNames, collect(matchResults) as matchResultsCollected
+WITH teamsNames, reduce(temporary = [], i IN range(0, size(matchResultsCollected) - 1) | 
+    CASE matchResultsCollected[i] = matchResultsCollected[i-1]
+      WHEN true THEN [j IN range(0, size(temporary) - 1) |
+          CASE j = size(temporary) - 1
+            WHEN true THEN temporary[j] + [matchResultsCollected[i]]
+            ELSE temporary[j]
+          END
+        ]
+      ELSE temporary + [[matchResultsCollected[i]]]
+    END
+  ) AS streaks 
+UNWIND streaks AS streak
+WITH teamsNames, streak
+WHERE streak[0] = 'Draw'
+WITH teamsNames, max(size(streak)) AS consecutiveDraws
+ORDER BY consecutiveDraws DESC
+WITH [consecutiveDraws, teamsNames] AS consecutiveDrawsArr
+WITH collect(consecutiveDrawsArr) AS consecutiveDraws, max(consecutiveDrawsArr[0]) AS maxDrawAmounts
+UNWIND consecutiveDraws AS consecutiveDrawsArrUnwind
+WITH consecutiveDrawsArrUnwind, maxDrawAmounts
+WHERE consecutiveDrawsArrUnwind[0] = maxDrawAmounts
+MATCH (winners:Team{name:consecutiveDrawsArrUnwind[1]})
+RETURN winners, maxDrawAmounts
 
 
 
