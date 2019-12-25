@@ -4,8 +4,6 @@ CREATE CONSTRAINT ON (n1:Referee) ASSERT n1.name IS UNIQUE;
 
 // Creating indexes
 // CREATE INDEX ON:Team(name);  // Existing due to the UNIQUE constraint
-CREATE INDEX ON:Match(FTHG);
-CREATE INDEX ON:Match(FTAG);
 CREATE INDEX ON:Played(result);
 
 
