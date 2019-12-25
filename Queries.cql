@@ -17,12 +17,17 @@ RETURN SUM(matchAway.FTAG) + homeGoals AS goalsScored, SUM(matchAway.FTHG) + hom
 
 // 4. Which teams have the most and least shots in the season?
 MATCH (team:Team) - [:Played{home:False}] -> (matchAway:Match)
-WITH [SUM(matchAway.AS), team.name] AS awayShots
+WITH [SUM(matchAway.AS), team.name] AS awayGoals
 MATCH (team:Team) - [:Played{home:True}] -> (matchHome:Match)
-WHERE awayShots[1] = team.name
-WITH  [(SUM(matchHome.HS) + awayShots[0]), team.name] AS totalShots
-RETURN MIN(totalShots)[1] AS leastShots, MAX(totalShots)[1] AS mostShots;
-
+WHERE awayGoals[1] = team.name
+WITH  [(SUM(matchHome.HS) + awayGoals[0]), team.name] AS totalShots
+WITH collect(totalShots) AS totalShotsCollected, max(totalShots[0]) as maxShots, min(totalShots[0]) as minShots
+UNWIND totalShotsCollected AS totalShotsUnwind
+WITH totalShotsUnwind, maxShots, minShots
+WHERE totalShotsUnwind[0] = maxShots OR totalShotsUnwind[0] = minShots
+MATCH (team:Team{name:totalShotsUnwind[1]})
+RETURN team AS Team, totalShotsUnwind[0] AS Shots 
+ORDER BY Shots DESC;
 
 // 5. Who refereed the most matches?
 MATCH (referees:Referee) - [ref:Ref] - (:Match)

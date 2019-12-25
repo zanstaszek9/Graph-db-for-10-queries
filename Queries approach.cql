@@ -196,7 +196,30 @@ WHERE totalShotsUnwind[0] = maxShots OR totalShotsUnwind[0] = minShots
 MATCH (team:Team{name:totalShotsUnwind[1]})
 RETURN team, maxShots, minShots
 
+MATCH (team:Team) - [:Played{home:False}] -> (matchAway:Match)
+WITH [SUM(matchAway.AS), team.name] AS awayGoals
+MATCH (team:Team) - [:Played{home:True}] -> (matchHome:Match)
+WHERE awayGoals[1] = team.name
+WITH  [(SUM(matchHome.HS) + awayGoals[0]), team.name] AS totalShots
+WITH totalShots, collect(totalShots) AS totalShotsCollected, max(totalShots[0]) as maxShots, min(totalShots[0]) as minShots
+UNWIND totalShotsCollected AS totalShotsUnwind
+WITH totalShotsUnwind, maxShots, minShots, totalShots
+WHERE totalShotsUnwind[0] = maxShots OR totalShotsUnwind[0] = minShots
+MATCH (team:Team{name:totalShotsUnwind[1]})
+RETURN team, maxShots, minShots, totalShots
 
+
+MATCH (team:Team) - [:Played{home:False}] -> (matchAway:Match)
+WITH [SUM(matchAway.AS), team.name] AS awayGoals
+MATCH (team:Team) - [:Played{home:True}] -> (matchHome:Match)
+WHERE awayGoals[1] = team.name
+WITH  [(SUM(matchHome.HS) + awayGoals[0]), team.name] AS totalShots
+WITH collect(totalShots) AS totalShotsCollected, max(totalShots[0]) as maxShots, min(totalShots[0]) as minShots
+UNWIND totalShotsCollected AS totalShotsUnwind
+WITH totalShotsUnwind, maxShots, minShots
+WHERE totalShotsUnwind[0] = maxShots OR totalShotsUnwind[0] = minShots
+MATCH (team:Team{name:totalShotsUnwind[1]})
+RETURN team, totalShotsUnwind[0] AS shots 
 
 // 5. Who refereed the most matches?
 MATCH (referees:Referee) - [ref:Ref] - (:Match)
