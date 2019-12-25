@@ -709,7 +709,7 @@ WITH teamsNames, streak
 WHERE streak[0] = 'Draw'
 WITH teamsNames, max(size(streak)) AS consecutiveDraws
 ORDER BY consecutiveDraws DESC
-WITH [consecutiveDraws, x] AS consecutiveDrawsArr
+WITH [consecutiveDraws, teamsNames] AS consecutiveDrawsArr
 WITH collect(consecutiveDrawsArr) AS consecutiveDraws, max(consecutiveDrawsArr[0]) AS maxDrawAmounts
 UNWIND consecutiveDraws AS consecutiveDrawsArrUnwind
 WITH consecutiveDrawsArrUnwind, maxDrawAmounts
