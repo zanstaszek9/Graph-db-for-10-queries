@@ -34,9 +34,12 @@ ORDER BY Shots DESC;
 
 // 5. Who refereed the most matches?
 MATCH (referees:Referee) - [ref:Ref] - (:Match)
-WITH referees, COUNT(ref) AS countedRef 
-ORDER BY countedRef DESC LIMIT 1
-RETURN referees AS Referee, countedRef;
+WITH [COUNT(ref), referees] AS countedRef 
+WITH collect(countedRef) as colRef, MAX(countedRef[0]) AS mostRef
+UNWIND colRef AS countedRefU
+WITH countedRefU, mostRef
+WHERE countedRefU[0] = mostRef
+RETURN countedRefU[1] AS Referee, countedRefU[0] AS referedMatches;
 
 // 6. How many matches “Arsenal” won as the away team?
 MATCH (:Team{name:"Arsenal"}) - [:Played{home: False, result: "Win"}] - (matches:Match)
@@ -83,6 +86,7 @@ WITH teamsNames, reduce(temporary = [], i IN range(0, size(matchResultsCollected
 UNWIND streaks AS streak
 WITH teamsNames, streak
 WHERE streak[0] = 'Draw'
+// End of refered code; Source link above
 WITH teamsNames, MAX(size(streak)) AS consecutiveDraws
 ORDER BY consecutiveDraws DESC
 WITH [consecutiveDraws, teamsNames] AS consecutiveDrawsArr
@@ -95,7 +99,7 @@ WHERE consecutiveDrawsArrUnwind[0] = maxDrawAmounts
 MATCH (winners:Team{name:consecutiveDrawsArrUnwind[1]})
 RETURN winners AS Winners, maxDrawAmounts;
 // Source: 
-/// https://stackoverflow.com/questions/47671393/neo4j-cypher-return-most-consecutive-passes 
+//" https://stackoverflow.com/questions/47671393/neo4j-cypher-return-most-consecutive-passes "
 
 
 

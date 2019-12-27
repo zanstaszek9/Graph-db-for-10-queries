@@ -233,6 +233,18 @@ ORDER BY countedRef DESC LIMIT 1
 MATCH (mostRefered:Referee{name:referees.name})
 RETURN mostRefered AS refName, countedRef;
 
+MATCH (referees:Referee) - [ref:Ref] - (:Match)
+WITH [COUNT(ref), referees] AS countedRef 
+WITH collect(countedRef) as colRef, MAX(countedRef[0]) AS mostRef
+UNWIND colRef AS countedRefU
+WITH countedRefU, mostRef
+WHERE countedRefU[0] = mostRef
+RETURN countedRefU;
+
+MATCH (n1:Referee{name: "M Oliver"}), (n2:Match{FTHG: 5})
+WITH n1, n2 LIMIT 2
+MERGE (n1) - [r1:Ref] -> (n2)
+RETURN *;
 
 
 // 6. How many matches “Arsenal” won as the away team?

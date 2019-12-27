@@ -5,6 +5,9 @@ CREATE CONSTRAINT ON (n1:Referee) ASSERT n1.name IS UNIQUE;
 // Creating indexes
 // CREATE INDEX ON:Team(name);  // Existing due to the UNIQUE constraint
 CREATE INDEX ON:Played(result);
+CREATE INDEX ON:Played(home);
+CREATE INDEX ON:Match(date);    // Test the performance!
+
 
 
 // MERGE is not not working on complex queries; need to pasted separately
@@ -50,6 +53,7 @@ CASE
 END 
 // Returning COUNT for sanity check for amount of rows imported,
 // and to prevent lags or freeze due rendering graphical model of database
+// Count(match1) should return 380.
 RETURN COUNT(match1);
 
 
