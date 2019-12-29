@@ -12,6 +12,9 @@ DROP CONSTRAINT ON (n1:Referee) ASSERT n1.name IS UNIQUE;
 // Remove indexes
 // DROP INDEX ON:Team(name);  // Deleted earlier due to the UNIQUE constraint
 DROP INDEX ON:Played(result);
+DROP INDEX ON:Played(home);
+DROP INDEX ON:Match(date); 
+
 
 // Sanity check
 MATCH (n) - [r]-() RETURN n, r, COUNT(DISTINCT n), COUNT(DISTINCT r);
