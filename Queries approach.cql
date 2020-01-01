@@ -54,6 +54,9 @@ WITH liverpool, SUM(matchHome.FTHG) as homeGoals
 MATCH (liverpool) - [:Played{home:False}] -> (matchAway:Match)
 RETURN SUM(matchAway.FTAG) + homeGoals;
 
+
+
+
 //4. Which teams have the most and least shots in the season?
 MATCH (n1:Team) - [:Played{home:False}] -> (matchHome:Match)
 RETURN n1.name, SUM(matchHome.FTAG) as Goals 
@@ -65,12 +68,6 @@ RETURN n1.name, MAX(SUM(matchHome.FTAG)), MIN(SUM(matchHome.FTAG));
 MATCH (n1:Team) - [:Played{home:False}] -> (matchHome:Match)
 WITH n1.name as team, SUM(matchHome.FTAG) as goals
 RETURN MAX(goals), MIN(goals), team;
-
-MATCH (n1:Team) - [:Played{home:False}] -> (matchHome:Match)
-WITH n1.name as team, SUM(matchHome.FTAG) as goals
-RETURN (MAX(goals), MIN(goals), team;
-
-
 
 
 MATCH (n1:Team) - [:Played{home:False}] -> (matchHome:Match)
@@ -101,29 +98,12 @@ MATCH (n1:Team) - [:Played{home:True}] -> (matchAway:Match)
 WITH [SUM(matchAway.FTHG), n1.name] AS homeGoals WHERE
 RETURN [awayGoals[0] + homeGoals[0]];
 
-
-MATCH (n1:Team) - [:Played{home:False}] -> (matchHome:Match)
-WITH [SUM(matchHome.FTAG), n1.name] AS homeGoals ORDER BY homeGoals[1]
-FOREACH(n IN homeGoals[0] | SET n = 10)
-RETURN homeGoals;
-
-MATCH (n1:Team) - [:Played{home:True}] -> (matchAway:Match)
-WITH n1, [SUM(matchAway.FTAG), n1.name] as x
-WITH collect(x) as y
-RETURN unwind y;
-
-
-MATCH (n1:Team) - [r1:Played] -> (n2:Match)
-WITH (n1)-[r1.home = False] - (n2) AS awayMatches, (n1)-[r1.home = True] - (n2) AS homeMatche,
-RETURN awayMatches;
-
-
 MATCH (n1:Team) - [:Played{home:False}] -> (matchHome:Match)
 WITH [SUM(matchHome.FTAG), n1.name] AS awayGoals
 MATCH (n1:Team) - [:Played{home:True}] -> (matchAway:Match)
-WITH  [(SUM(matchAway.FTHG) + awayGoals[0] WHERE awayGoals[1] = n1.name), n1.name] AS homeGoals
-RETURN homeGoals
-ORDER BY homeGoals[1];
+WITH [SUM(matchAway.FTHG), n1.name] AS homeGoals, awayGoals
+RETURN [awayGoals[0] + homeGoals[0]];
+
 
 
 MATCH (team:Team) - [:Played{home:False}] -> (matchAway:Match)
@@ -262,6 +242,10 @@ WHERE (playedWin.home = True AND matches.HTR = 'A')
     OR  (playedWin.home = False AND matches.HTR = 'H') 
 RETURN matches;
 
+MATCH (liverpool:Team{name:"Liverpool"}) - [:Played{home: True, result: "Win"}] -> (matchesHome:Match{HTR: 'A'})
+WITH liverpool, matchesHome
+MATCH (liverpool:Team{name:"Liverpool"}) - [:Played{home: False, result: "Win"}] -> (matchesAway:Match{HTR: 'H'})
+RETURN matchesHome, matchesAway;
 
 // ZAPYTAJ
 OPTIONAL MATCH (liverpool:Team{name:"Liverpool"}) - [:Played{home: True, result: "Win"}] -> (matchesHome:Match{HTR: 'A'})

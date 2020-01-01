@@ -17,11 +17,11 @@ RETURN SUM(matchAway.FTAG) + homeGoals AS goalsScored, SUM(matchAway.FTHG) + hom
 
 // 4. Which teams have the most and least shots in the season?
 MATCH (team:Team) - [:Played{home:False}] -> (matchAway:Match)
-WITH [SUM(matchAway.AS), team.name] AS awayGoals
+WITH [SUM(matchAway.AS), team.name] AS awayShots
 MATCH (team:Team) - [:Played{home:True}] -> (matchHome:Match)
-WHERE awayGoals[1] = team.name 
-WITH  [(SUM(matchHome.HS) + awayGoals[0]), team.name] AS totalShots 
-// Collecting and Unwinding to use max and min as variables 
+WHERE awayShots[1] = team.name 
+WITH  [(SUM(matchHome.HS) + awayShots[0]), team.name] AS totalShots 
+// Collecting and Unwinding to use MAX and MIN as variables 
 WITH collect(totalShots) AS totalShotsCollected, 
     MAX(totalShots[0]) AS maxShots, MIN(totalShots[0]) AS minShots
 UNWIND totalShotsCollected AS totalShotsUnwind 
