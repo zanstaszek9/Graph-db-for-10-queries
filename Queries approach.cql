@@ -261,6 +261,8 @@ MATCH (liverpool:Team{name:"Liverpool"}) - [:Played{home: False, result: "Win"}]
 RETURN matchesAway;
 
 
+
+
 CREATE (:Team{name:"Manchester"}) - [:Played{home: True, result: "Win"}] -> (:Match{halfTimeResult: 'Away'});
 MATCH (n1:Team{name:"Manchester"})
 CREATE (n1) - [:Played{home: False, result: "Win"}] -> (:Match{halfTimeResult: 'Away'});
@@ -279,6 +281,71 @@ MATCH (:Team{name:"Manchester"}) - [playedWin:Played{result: "Win"}] -> (matches
 WHERE (playedWin.home = True AND matches.halfTimeResult = 'Away') 
     OR  (playedWin.home = False AND matches.halfTimeResult = 'Home') 
 RETURN matches;
+
+
+MATCH (t:Team) - [playedWin:Played{result: "Win"}] - (matches:Match)
+WHERE (playedWin.home = True AND matches.HTR = 'A') 
+    OR  (playedWin.home = False AND matches.HTR = 'H') 
+RETURN t, playedWin, matches ORDER BY t.name;
+
+OPTIONAL MATCH (t:Team) - [r1:Played{home: True, result: "Win"}] -> (matchesHome:Match{HTR: 'A'})
+WITH t, r1, matchesHome
+OPTIONAL MATCH (t:Team) - [r2:Played{home: False, result: "Win"}] -> (matchesAway:Match{HTR: 'H'})
+RETURN t, r1, r2, matchesHome, matchesAway
+ORDER BY t.name;
+
+
+OPTIONAL MATCH (t:Team) - [r1:Played{home: True, result: "Win"}] -> (matchesHome:Match{HTR: 'A'})
+WITH t, r1, matchesHome
+OPTIONAL MATCH (t2:Team) - [r2:Played{home: False, result: "Win"}] -> (matchesAway:Match{HTR: 'H'})
+RETURN t, t2, r1, r2, matchesHome, matchesAway
+ORDER BY t.name;
+
+OPTIONAL MATCH (t:Team) - [r1:Played{home: True, result: "Win"}] -> (matchesHome:Match{HTR: 'A'})
+WITH t, r1, matchesHome
+OPTIONAL MATCH (t:Team) - [r2:Played{home: False, result: "Win"}] -> (matchesAway:Match{HTR: 'H'})
+RETURN t, r1, r2, matchesHome, matchesAway
+ORDER BY t.name;
+
+OPTIONAL MATCH (t:Team) - [:Played{home: True, result: "Win"}] -> (matchesHome:Match{HTR: 'A'})
+WITH t, matchesHome
+OPTIONAL MATCH (t2:Team) - [:Played{home: False, result: "Win"}] -> (matchesAway:Match{HTR: 'H'})
+RETURN matchesHome, matchesAway;
+
+OPTIONAL MATCH (:Team) - [:Played{home: True, result: "Win"}] -> (matchesHome:Match{HTR: 'A'})
+WITH matchesHome 
+OPTIONAL MATCH (:Team) - [:Played{home: False, result: "Win"}] -> (matchesAway:Match{HTR: 'H'})
+WITH matchesHome + matchesAway;
+
+OPTIONAL MATCH (:Team) - [:Played{home: True, result: "Win"}] -> (matchesHome:Match{HTR: 'A'})
+WITH collect(matchesHome) as col 
+OPTIONAL MATCH (:Team) - [:Played{home: False, result: "Win"}] -> (matchesAway:Match{HTR: 'H'})
+RETURN col, matchesAway;
+
+OPTIONAL MATCH (:Team) - [:Played{home: True, result: "Win"}] -> (matchesHome:Match{HTR: 'A'})
+RETURN matchesHome AS Matches
+UNION 
+OPTIONAL MATCH (:Team) - [:Played{home: False, result: "Win"}] -> (matchesAway:Match{HTR: 'H'})
+RETURN matchesAway AS Matches;
+
+
+MATCH (:Team{name:"Bournemouth"}) - [playedWin:Played{result: "Win"}] - (matches:Match)
+WHERE (playedWin.home = True AND matches.HTR = 'A') 
+    OR  (playedWin.home = False AND matches.HTR = 'H') 
+RETURN matches;
+
+MATCH (t:Team{name:"Bournemouth"}) - [playedWin:Played{result: "Win"}] - (matches:Match)
+WHERE (playedWin.home = True AND matches.HTR = 'A') 
+    OR  (playedWin.home = False AND matches.HTR = 'H') 
+RETURN *;
+
+
+OPTIONAL MATCH (liverpool:Team{name:"Bournemouth"}) - 
+[:Played{home: True, result: "Win"}] -> (matchesHome:Match{HTR: 'A'})
+WITH liverpool, matchesHome
+OPTIONAL MATCH (liverpool2:Team{name:"Bournemouth"}) - 
+[:Played{home: False, result: "Win"}] -> (matchesAway:Match{HTR: 'H'})
+RETURN matchesHome, matchesAway;
 
 
 // Performance test option for properties set? played
