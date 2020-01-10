@@ -371,64 +371,23 @@ OPTIONAL MATCH (team:Team) - [played:Played{result: "Draw"}] - (matchesDrawn:Mat
 WITH team, COUNT(matchesWon) as countWon, COUNT(matchesDrawn) as countDrawn
 RETURN team.name, countWon, countDrawn;
 
-
-
-MATCH (team:Team) - [played:Played{result: "Win"}] - (matchesWon:Match)
-WITH team, COUNT(matchesWon) as countWon
-RETURN team.name, countWon;
-
-
-MATCH (team:Team) - [played:Played{result: "Win"}] - (matchesWon:Match)
-WITH team, COUNT(matchesWon) as countWon
-RETURN team.name, countWon;
-
-
+MATCH (team:Team) - [:Played{result: "Win"}] - (matchesWon:Match)
+WITH team, matchesWon
+OPTIONAL MATCH (team) - [:Played{result: "Draw"}] - (matchesDrawn:Match)
+RETURN team.name, COUNT(DISTINCT matchesWon) as countWon, COUNT(DISTINCT matchesDrawn) as countDrawn;
 
 MATCH (team:Team) - [:Played{result: "Win"}] - (matchesWon:Match)
 WITH team, matchesWon
 OPTIONAL MATCH (team) - [:Played{result: "Draw"}] - (matchesDrawn:Match)
-RETURN team.name as Team, COUNT(DISTINCT matchesWon) as Win, COUNT(DISTINCT matchesDrawn) as Draws;
-
-
-MATCH (team:Team) - [:Played{result: "Win"}] - (matchesWon:Match)
-WITH team, matchesWon
-OPTIONAL MATCH (team) - [:Played{result: "Draw"}] - (matchesDrawn:Match)
-RETURN team.name, COUNT(DISTINCT matchesWon), COUNT(DISTINCT matchesDrawn);
-
-
-
-MATCH (team:Team) - [:Played{result: "Win"}] - (matchesWon:Match)
-WITH team, matchesWon
-OPTIONAL MATCH (team) - [:Played{result: "Draw"}] - (matchesDrawn:Match)
-RETURN team.name, toInteger(COUNT(DISTINCT matchesWon))*3, COUNT(DISTINCT matchesDrawn);
-
-MATCH (team:Team) - [:Played{result: "Win"}] - (matchesWon:Match)
-WITH team, matchesWon
-OPTIONAL MATCH (team) - [:Played{result: "Draw"}] - (matchesDrawn:Match)
-WITH team, toInteger(COUNT(DISTINCT matchesWon))*3 as countWon, toInteger(COUNT(DISTINCT matchesDrawn)) as countDrawn
-RETURN team.name, countWon, countDrawn;
-
+RETURN team.name, COUNT(DISTINCT matchesWon) *3 + COUNT(DISTINCT matchesDrawn) as ranking;
 
 MATCH (team:Team) - [:Played{result: "Win"}] - (matchesWon:Match)
 WITH team, matchesWon
 OPTIONAL MATCH (team) - [:Played{result: "Draw"}] - (matchesDrawn:Match)
 WITH team, (COUNT(DISTINCT matchesWon)) as countWon, (COUNT(DISTINCT matchesDrawn)) as countDrawn
-RETURN team.name, toInteger(countWon), toInteger(countDrawn);
-
-
-MATCH (team:Team) - [:Played{result: "Win"}] - (matchesWon:Match)
-WITH team, matchesWon
-OPTIONAL MATCH (team) - [:Played{result: "Draw"}] - (matchesDrawn:Match)
-WITH team, (COUNT(DISTINCT matchesWon)) as countWon, (COUNT(DISTINCT matchesDrawn)) as countDrawn
-RETURN team.name as Team, toInteger(countWon)*3 + toInteger(countDrawn) as TotalPoints
+RETURN team.name as Team, (countWon)*3 + (countDrawn) as TotalPoints
 ORDER BY TotalPoints DESC;
 
-
-
-MATCH (team:Team) - [:Played{result: "Win"}] - (matchesWon:Match)
-WITH team, matchesWon
-OPTIONAL MATCH (team) - [:Played{result: "Draw"}] - (matchesDrawn:Match)
-RETURN team.name, (toInteger(COUNT(DISTINCT matchesWon))*3 + toInteger(COUNT(DISTINCT matchesDrawn));
 
 // 10. Which team has drawn the most consecutive matches?
 MATCH (n1:Team{name:"Arsenal"}) - [r1:Played] -> (n2:Match)
