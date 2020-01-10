@@ -52,16 +52,12 @@ RETURN matches AS Matches;
 
 // 8. Display all matches that “Liverpool” won 
 // but were down in the first half.
-OPTIONAL MATCH (:Team{name:"Liverpool"}) - [:Played{home: True, result: "Win"}] -> (matchesHome:Match{HTR: 'A'})
-WITH matchesHome
-OPTIONAL MATCH (:Team{name:"Liverpool"}) - [:Played{home: False, result: "Win"}] -> (matchesAway:Match{HTR: 'H'})
-RETURN matchesHome, matchesAway;
-
-OPTIONAL MATCH (:Team{name:"Liverpool"}) - [:Played{home: True, result: "Win"}] -> (matchesHome:Match{HTR: 'A'})
+MATCH (:Team{name:"Liverpool"}) - [:Played{home: True, result: "Win"}] -> (matchesHome:Match{HTR: 'A'})
 RETURN matchesHome AS Matches
 UNION 
-OPTIONAL MATCH (:Team{name:"Liverpool"}) - [:Played{home: False, result: "Win"}] -> (matchesAway:Match{HTR: 'H'})
+MATCH (:Team{name:"Liverpool"}) - [:Played{home: False, result: "Win"}] -> (matchesAway:Match{HTR: 'H'})
 RETURN matchesAway AS Matches;
+
 // 9. Write a query to display the final ranking of 
 // all the teams based on their total points.
 MATCH (team:Team) - [:Played{result: "Win"}] - (matchesWon:Match)

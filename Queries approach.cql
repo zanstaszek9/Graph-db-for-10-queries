@@ -322,10 +322,10 @@ WITH collect(matchesHome) as col
 OPTIONAL MATCH (:Team) - [:Played{home: False, result: "Win"}] -> (matchesAway:Match{HTR: 'H'})
 RETURN col, matchesAway;
 
-OPTIONAL MATCH (:Team) - [:Played{home: True, result: "Win"}] -> (matchesHome:Match{HTR: 'A'})
+OPTIONAL MATCH (:Team{name:"Liverpool"}) - [:Played{home: True, result: "Win"}] -> (matchesHome:Match{HTR: 'A'})
 RETURN matchesHome AS Matches
 UNION 
-OPTIONAL MATCH (:Team) - [:Played{home: False, result: "Win"}] -> (matchesAway:Match{HTR: 'H'})
+OPTIONAL MATCH (:Team{name:"Liverpool"}) - [:Played{home: False, result: "Win"}] -> (matchesAway:Match{HTR: 'H'})
 RETURN matchesAway AS Matches;
 
 
@@ -360,7 +360,7 @@ WITH  [(SUM(matchHome.FTHG) + awayGoals[0]), team.name] AS totalGoals ORDER BY t
 RETURN totalGoals[1] as Team, totalGoals[0] as Points;
 
 
-MATCH (team:Team) - [played:Played{}]
+MATCH (team:Team) - [played:Played{}] -()
 WITH team, COUNT(played.result = "Win") as matchesWon, COUNT(played.result = "Draw") as matchesDrawn
 RETURN team.name, matchesWon, matchesDrawn;
 
@@ -429,7 +429,6 @@ MATCH (team:Team) - [:Played{result: "Win"}] - (matchesWon:Match)
 WITH team, matchesWon
 OPTIONAL MATCH (team) - [:Played{result: "Draw"}] - (matchesDrawn:Match)
 RETURN team.name, (toInteger(COUNT(DISTINCT matchesWon))*3 + toInteger(COUNT(DISTINCT matchesDrawn));
-
 
 // 10. Which team has drawn the most consecutive matches?
 MATCH (n1:Team{name:"Arsenal"}) - [r1:Played] -> (n2:Match)
