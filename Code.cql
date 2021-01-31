@@ -17,7 +17,7 @@ LOAD CSV WITH HEADERS FROM
 AS row
 WITH row 
 WITH SPLIT(row.Date, '/') AS list, row
-// Using CREATE, as Merge can match the values that are existing with same properties' values
+// Using CREATE, as Merge can match the values that are existing with same properties values
 CREATE (match1:Match{
     date:date((list[2] + '-' + list[1] + '-' + list[0])),
     FTHG:toInteger(row.FTHG),   // Full Time Home (team) Goals
